@@ -1,0 +1,140 @@
+/*
+	Copyright (c) 1990	Keith Walker
+	All rights reserved
+	
+	Redistribution and use in source and binary forms are permitted
+	provided that the above copyright notice and this paragraph are
+	duplicated in all such forms.
+	
+	THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR IMPLIED
+	WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
+	MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+*/
+
+#define	out(x)	x
+
+out(#ifndef _TERM)
+out(#define _TERM)
+out(#include <termios.h>)
+out(#ifndef _CURSES)
+out(#ifdef SMALL_CURSES)
+out(typedef	unsigned short	chtype ;)
+out(#else)
+out(typedef	unsigned long	chtype ;)
+out(#endif)
+out(#endif)
+
+#define	def(a,b,c)	#define	a	cur_term->!!a
+
+#include	"bool.cap"
+
+#include	"numeric.cap"
+
+#include	"str.cap"
+
+out(#ifndef SMALL_CURSES)
+/* colours are considered to be made up from the three primary colours :
+   red, green and blue.   The amount of each component in a colour is
+   concidered to range from 0 (not present) to 1000 (as much as possible.) */
+
+typedef struct _content {
+  short	red ;			/* red component of colour */
+  short	green ;			/* green component of colour */
+  short	blue ;			/* blue component of colour */
+  } CONTENT ;
+
+
+/* colours are handled in curses by concidering the foreground and
+   background colour as one 'attribute' */
+
+typedef struct _pair {
+  int	fg ;
+  int	bg ;
+  } PAIR ;
+out(#endif)
+
+
+typedef	struct _terminal {
+  char	termname[15] ;		/* terminal name */
+  char *_termdesc ;		/* terminal discription */
+
+  /* terminfo booleans */
+  char	_bool_starter ;
+#undef	def
+#define	def(a,b,c)		char	!!a ;
+#include	"bool.cap"
+  char	_bool_terminator ;
+
+  /* terminfo numerics */
+  short	_numeric_starter ;
+#undef	def
+#define	def(a,b,c)	short	!!a ;
+#include	"numeric.cap"
+  short	_numeric_terminator ;
+
+  /* input strings */
+  char *	_string_starter ;
+#undef	def
+#define	def(a,b,c)	char *	!!a ;
+#include	"str.cap"
+  char *	_string_terminator ;
+
+out(#ifndef SMALL_CURSES)
+  /* colour information */
+  CONTENT *_colour_content;		/* colour content table */
+  PAIR    *_colour_pairs;		/* colour pair table */
+out(#endif)
+  int    _outfd;			/* output file handle */
+  long   _flags;			/* current terminal state */
+  chtype _attr;				/* current terminal attribute */
+  chtype _supported_attr;		/* attributes actually supported */
+  /* terminal settings */
+  struct termios _prog_mode;			/* program state */
+  struct termios _shell_mode;		/* shell state */
+  } TERMINAL ;
+
+out(#ifdef __STDC__)
+out(#define	_(t)	t)
+out(#else)
+out(#define	_(t)	())
+out(#endif)
+
+extern TERMINAL *cur_term;
+extern struct termios _tty_state;
+
+extern char *boolnames[];
+extern char *boolcodes[];
+extern char *boolfnames[];
+extern char *numnames[];
+extern char *numcodes[];
+extern char *numfnames[];
+extern char *strnames[];
+extern char *strcodes[];
+extern char *strfnames[];
+
+extern int setupterm _((char *term, int fildes, int *errret));
+out(#ifndef setterm)
+extern int setterm _((char *term));
+out(#endif)
+extern int set_curterm _((TERMINAL *nterm));
+extern int del_curterm _((TERMINAL *oterm));
+extern int restartterm _((char * term, int fildes, int *errret));
+extern char *tparm _((char *str, ...));
+extern int tputs _((char *str, int count, int (*putch)(int)));
+extern int putp _((char *str));
+extern int vidputs _((chtype attr, int (*putch)(int)));
+extern int vidattr _((chtype attr));
+extern int mvcur _((int oldrow, int oldcol, int newrow, int newcol));
+extern int tigetflag _((char *capname));
+extern int tigetnum _((char *capname));
+extern char *tigetstr _((char *capname));
+
+/* and some termcap compatability routines */
+extern int tgetent _((char *bp, char *name));
+extern int tgetflag _((char *codename));
+extern int tgetnum _((char *codename));
+extern char *tgetstr _((char *codename, char **area));
+extern char *tgoto _((char *codename, int col, int row));
+
+out(#undef	_)
+out(#endif /*TERM*/)
