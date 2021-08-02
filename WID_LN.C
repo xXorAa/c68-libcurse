@@ -37,8 +37,8 @@ winsdelln(WINDOW *win, int n)
     {
     if(n+win->_rows >= win->_cury) n = win->_cury - win->_rows + 1;
     ystart = win->_lines + win->_cury;
-    yend = win->_lines + win->_rows + n;
-    yptr = ystart - n;
+    yptr = win->_lines + win->_rows + n;
+    yend = ystart - n;
     for(; ystart != yend; ystart++, yptr++)
       {
       (void)memcpy((void *)ystart->line, (void *)yptr->line, size);
@@ -66,7 +66,7 @@ winsdelln(WINDOW *win, int n)
     }
   else
     {
-    ystart = win->_lines + win->_rows;
+    ystart = win->_lines + win->_rows - 1;
     yptr = yend - 1;
     for(; ystart != yend; ystart--, yptr--)
       {
