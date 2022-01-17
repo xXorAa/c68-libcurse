@@ -1,0 +1,9 @@
+*.o
+*.O
+*_o
+*_O
+wlist
+slblist
+*_a
+*_A
+
